@@ -151,9 +151,9 @@ If you don't want a detailed description (the text underneath the title) you don
 
 ## Custom Design File Properties
 
-For a list/description of custom design file properties see: [CustomDesignFilePropertySpecs.md](https://github.com/donileo/RMessage/blob/master/CustomDesignFilePropertySpecs.md)
+For a list/description of custom design file properties see: [CustomDesignFilePropertySpecs.md](https://github.com/donileo/RMessage/blob/3.0.0/CustomDesignFilePropertySpecs.md)
 
-For version compatibility of custom design file properties see: [CustomDesignFilePropertyCompatibility.md](https://github.com/donileo/RMessage/blob/master/CustomDesignFilePropertyCompatibility.md)
+For version compatibility of custom design file properties see: [CustomDesignFilePropertyCompatibility.md](https://github.com/donileo/RMessage/blob/3.0.0/CustomDesignFilePropertyCompatibility.md)
 
 ## Screenshots
 
