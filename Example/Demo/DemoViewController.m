@@ -219,7 +219,7 @@
 
 - (IBAction)didTapCustomDesign:(id)sender
 {
-  // this is an example on how to apply a custom design
+  // This is an example on how to apply a custom design
   [RMessage addDesignsFromFileWithName:@"AlternativeDesigns" inBundle:[NSBundle mainBundle]];
   [RMessage showNotificationWithTitle:@"Added custom design file".attributedString
                              subtitle:@"This background is blue while the subtitles are white. Yes this is still an "
@@ -278,14 +278,16 @@
   self.navigationController.navigationBarHidden = !self.navigationController.navigationBarHidden;
 }
 
-//- (CGFloat)customVerticalOffsetForMessageView:(RMessageView *)messageView
-//{
-//    return 88.f; // specify an additional offset here.
-//}
+/*- (CGFloat)customVerticalOffsetForMessageView:(RMessageView *)messageView
+{
+    return 88.f; // specify an additional offset here.
+}
+*/
 
-//- (void)customizeMessageView:(RMessageView *)messageView
-//{
-//    messageView.messageOpacity = 0.5f;
-//}
+/*- (void)customizeMessageView:(RMessageView *)messageView
+{
+  messageView.messageOpacity = 0.5f;
+}
+*/
 
 @end

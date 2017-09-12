@@ -984,6 +984,7 @@ static NSMutableDictionary *globalDesignDictionary;
 
 - (void)animateMessage
 {
+  dispatch_async(dispatch_get_main_queue(), ^{
   [self.superview layoutIfNeeded];
   if (!self.shouldBlurBackground) self.alpha = 0.f;
   [UIView animateWithDuration:kRMessageAnimationDuration + 0.2f
@@ -1009,6 +1010,7 @@ static NSMutableDictionary *globalDesignDictionary;
         [self.delegate messageViewDidPresent:self];
       }
     }];
+  });
 }
 
 - (void)dismiss
@@ -1019,6 +1021,7 @@ static NSMutableDictionary *globalDesignDictionary;
 - (void)dismissWithCompletion:(void (^)(void))completionBlock
 {
   self.messageIsFullyDisplayed = NO;
+  dispatch_async(dispatch_get_main_queue(), ^{
   [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(dismiss) object:self];
 
   [UIView animateWithDuration:kRMessageAnimationDuration
@@ -1035,6 +1038,7 @@ static NSMutableDictionary *globalDesignDictionary;
       if (completionBlock) completionBlock();
       if (self.dismissalBlock) self.dismissalBlock();
     }];
+  });
 }
 
 #pragma mark - Misc methods
@@ -1061,7 +1065,7 @@ static NSMutableDictionary *globalDesignDictionary;
 {
   if (self.isPresenting) [NSObject cancelPreviousPerformRequestsWithTarget:self selector:@selector(dismiss) object:self];
 
-  // on completion of UI rotation recalculate positioning
+  // On completion of UI rotation recalculate positioning
   [self layoutMessageForPresentation];
   self.topToVCLayoutConstraint.constant = self.topToVCFinalConstant;
 }
