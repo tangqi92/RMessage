@@ -57,9 +57,9 @@ static NSMutableDictionary *globalDesignDictionary;
 
 @property (nonatomic, strong) NSMutableArray *interElementMarginConstraints;
 
-@property (nonatomic, copy) void (^dismissalBlock)();
-@property (nonatomic, copy) void (^tapBlock)();
-@property (nonatomic, copy) void (^completionBlock)();
+@property (nonatomic, copy) void (^dismissalBlock)(void);
+@property (nonatomic, copy) void (^tapBlock)(void);
+@property (nonatomic, copy) void (^completionBlock)(void);
 
 /** The starting constant value that should be set for the topToVCTopLayoutConstraint when animating */
 @property (nonatomic, assign) CGFloat topToVCStartConstant;

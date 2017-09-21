@@ -11,6 +11,7 @@
 #import "RMessageViewProtocol.h"
 
 static UIViewController *_defaultViewController;
+static NSLock *mLock, *nLock;
 
 @interface RMessage () <RMessageViewProtocol>
 
@@ -31,6 +32,8 @@ static UIViewController *_defaultViewController;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
     sharedMessage = [RMessage new];
+    mLock = [NSLock new];
+    nLock = [NSLock new];
   });
   return sharedMessage;
 }
@@ -299,11 +302,17 @@ static UIViewController *_defaultViewController;
 
 + (void)prepareNotificationForPresentation:(RMessageView *)messageView
 {
+  [mLock lock];
   [[RMessage sharedMessage].messages addObject:messageView];
+  [mLock unlock];
 
+  [nLock lock];
   if (![RMessage sharedMessage].notificationActive) {
+    [nLock unlock];
     [[RMessage sharedMessage] presentMessageView];
+    return;
   }
+  [nLock unlock];
 }
 
 + (BOOL)dismissActiveNotification
@@ -313,13 +322,19 @@ static UIViewController *_defaultViewController;
 
 + (BOOL)dismissActiveNotificationWithCompletion:(void (^)(void))completionBlock
 {
-  if ([RMessage sharedMessage].messages.count == 0 || ![RMessage sharedMessage].messages) return NO;
+  [mLock lock];
+  if ([RMessage sharedMessage].messages.count == 0 || ![RMessage sharedMessage].messages) {
+    [mLock unlock];
+    return NO;
+  }
+
   RMessageView *currentMessage = [RMessage sharedMessage].messages[0];
 
   if (currentMessage && currentMessage.messageIsFullyDisplayed) {
     [currentMessage dismissWithCompletion:completionBlock];
   }
 
+  [mLock unlock];
   return YES;
 }
 
@@ -344,12 +359,18 @@ static UIViewController *_defaultViewController;
 
 + (BOOL)isNotificationActive
 {
-  return [RMessage sharedMessage].notificationActive;
+  [nLock lock];
+  BOOL notificationActive = [RMessage sharedMessage].notificationActive;
+  [nLock unlock];
+  return notificationActive;
 }
 
 + (NSArray *)queuedMessages
 {
-  return [[RMessage sharedMessage].messages copy];
+  [mLock lock];
+  NSArray *messagesCopy = [[RMessage sharedMessage].messages copy];
+  [mLock unlock];
+  return messagesCopy;
 }
 
 #pragma mark - Instance Methods
@@ -358,15 +379,23 @@ static UIViewController *_defaultViewController;
 {
   self = [super init];
   if (self) {
+    [mLock lock];
     _messages = [NSMutableArray new];
+    [mLock unlock];
   }
   return self;
 }
 
 - (void)presentMessageView
 {
-  if (self.messages.count == 0) return;
+  [mLock lock];
+  if (self.messages.count == 0) {
+    [mLock unlock];
+    return;
+  }
+
   RMessageView *messageView = self.messages[0];
+  [mLock unlock];
 
   if (self.delegate && [self.delegate respondsToSelector:@selector(customizeMessageView:)]) {
     [self.delegate customizeMessageView:messageView];
@@ -378,7 +407,9 @@ static UIViewController *_defaultViewController;
 
 - (void)messageViewIsPresenting:(RMessageView *)messageView
 {
+  [nLock lock];
   self.notificationActive = YES;
+  [nLock unlock];
   if (self.delegate && [self.delegate respondsToSelector:@selector(messageViewDidPresent:)]) {
     [self.delegate messageViewDidPresent:messageView];
   }
@@ -386,18 +417,27 @@ static UIViewController *_defaultViewController;
 
 - (void)messageViewDidDismiss:(RMessageView *)messageView
 {
+  [mLock lock];
   if (self.messages.count > 0) {
     [self.messages removeObjectAtIndex:0];
   }
+  [mLock unlock];
+
+  [nLock lock];
   self.notificationActive = NO;
+  [nLock unlock];
 
   if (self.delegate && [self.delegate respondsToSelector:@selector(messageViewDidDismiss:)]) {
     [self.delegate messageViewDidDismiss:messageView];
   }
 
+  [mLock lock];
   if (self.messages.count > 0) {
+    [mLock unlock];
     [self presentMessageView];
+    return;
   }
+  [mLock unlock];
 }
 
 - (CGFloat)customVerticalOffsetForMessageView:(RMessageView *)messageView
@@ -430,14 +470,19 @@ static UIViewController *_defaultViewController;
     [self.delegate didTapMessageView:messageView];
   }
   [messageView dismissWithCompletion:^{
-    [messageView executeMessageViewCallBack];
+    [messageView executeMessageViewTapAction];
   }];
 }
 
 + (void)interfaceDidRotate
 {
-  if ([RMessage sharedMessage].messages.count == 0) return;
+  [mLock lock];
+  if ([RMessage sharedMessage].messages.count == 0) {
+    [mLock unlock];
+    return;
+  }
   [[RMessage sharedMessage].messages[0] interfaceDidRotate];
+  [mLock unlock];
 }
 
 @end
