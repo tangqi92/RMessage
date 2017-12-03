@@ -55,8 +55,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationWithTitle:(NSAttributedString *)title
@@ -77,8 +77,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationWithTitle:(NSAttributedString *)title
@@ -102,8 +102,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationWithTitle:(NSAttributedString *)title
@@ -130,8 +130,8 @@ static NSLock *mLock, *nLock;
                                rightView:rightView
                           backgroundView:backgroundView
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationWithTitle:(NSAttributedString *)title
@@ -145,8 +145,8 @@ static NSLock *mLock, *nLock;
                         rightView:(UIView *)rightView
                    backgroundView:(UIView *)backgroundView
                         tapAction:(void (^)(void))tapBlock
-                        dismissal:(void (^)(void))dismissalBlock
-                       completion:(void (^)(void))completionBlock
+             presentingCompletion:(void (^)(void))presentingCompletion
+                dismissCompletion:(void (^)(void))dismissCompletionBlock
 {
   [self showNotificationInViewController:_defaultViewController
                                    title:title
@@ -160,8 +160,8 @@ static NSLock *mLock, *nLock;
                                rightView:rightView
                           backgroundView:backgroundView
                                tapAction:tapBlock
-                               dismissal:dismissalBlock
-                              completion:completionBlock];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 #pragma mark inViewController functions
@@ -184,8 +184,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationInViewController:(UIViewController *)viewController
@@ -207,8 +207,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationInViewController:(UIViewController *)viewController
@@ -233,8 +233,8 @@ static NSLock *mLock, *nLock;
                                rightView:nil
                           backgroundView:nil
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationInViewController:(UIViewController *)viewController
@@ -262,8 +262,8 @@ static NSLock *mLock, *nLock;
                                rightView:rightView
                           backgroundView:backgroundView
                                tapAction:tapBlock
-                               dismissal:nil
-                              completion:nil];
+                    presentingCompletion:nil
+                       dismissCompletion:nil];
 }
 
 + (void)showNotificationInViewController:(UIViewController *)viewController
@@ -278,9 +278,8 @@ static NSLock *mLock, *nLock;
                                rightView:(UIView *)rightView
                           backgroundView:(UIView *)backgroundView
                                tapAction:(void (^)(void))tapBlock
-                               dismissal:(void (^)(void))dismissalBlock
-                              completion:(void (^)(void))completionBlock
-
+                    presentingCompletion:(void (^)(void))presentingCompletionBlock
+                     dismissCompletion:(void (^)(void))dismissCompletionBlock
 {
   RMessageView *messageView = [[RMessageView alloc] initWithDelegate:[RMessage sharedMessage]
                                                                title:title
@@ -295,8 +294,8 @@ static NSLock *mLock, *nLock;
                                                            rightView:rightView
                                                       backgroundView:backgroundView
                                                            tapAction:tapBlock
-                                                           dismissal:dismissalBlock
-                                                          completion:completionBlock];
+                                                presentingCompletion:presentingCompletionBlock
+                                                dismissCompletion:dismissCompletionBlock];
   [self prepareNotificationForPresentation:messageView];
 }
 
@@ -450,28 +449,23 @@ static NSLock *mLock, *nLock;
 
 - (void)windowRemovedForEndlessDurationMessageView:(RMessageView *)messageView
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(windowRemovedForEndlessDurationMessageView:)]) {
+  if ([self.delegate respondsToSelector:@selector(windowRemovedForEndlessDurationMessageView:)]) {
     [self.delegate windowRemovedForEndlessDurationMessageView:messageView];
   }
-  [messageView dismissWithCompletion:nil];
 }
 
-- (void)didSwipeToDismissMessageView:(RMessageView *)messageView
+- (void)didSwipeMessageView:(RMessageView *)messageView
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(didSwipeToDismissMessageView:)]) {
-    [self.delegate didSwipeToDismissMessageView:messageView];
+  if ([self.delegate respondsToSelector:@selector(didSwipeMessageView:)]) {
+    [self.delegate didSwipeMessageView:messageView];
   }
-  [messageView dismissWithCompletion:nil];
 }
 
 - (void)didTapMessageView:(RMessageView *)messageView
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(didTapMessageView:)]) {
+  if ([self.delegate respondsToSelector:@selector(didTapMessageView:)]) {
     [self.delegate didTapMessageView:messageView];
   }
-  [messageView dismissWithCompletion:^{
-    [messageView executeMessageViewTapAction];
-  }];
 }
 
 + (void)interfaceDidRotate

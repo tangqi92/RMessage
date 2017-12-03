@@ -45,6 +45,7 @@
 @property (nonatomic, strong) UIFont *subtitleFont;
 @property (nonatomic, assign) NSTextAlignment subtitleAlignment;
 @property (nonatomic, strong) UIColor *subtitleTextColor;
+@property (nonatomic, assign) BOOL titleSubtitleLabelsSizeToFit;
 
 /** The opacity of the message view. When customizing RMessage always set this value to the desired opacity instead of
  the alpha property. Internally the alpha property is changed during animations; this property allows RMessage to
@@ -70,8 +71,8 @@
  @param rightView The view to position on the right of the title and subtitle labels
  @param backgroundView The view to position as the background view of the message
  @param tapBlock The block that should be executed when the user taps on the message
- @param dismissalBlock The block that should be executed, after the message is dismissed
- @param completionBlock The block that should be executed after the message finishes presenting
+ @param presentingCompletionBlock The block that should be executed after the message finishes presenting
+ @param dismissCompletionBlock The block that should be executed, after the message is dismissed
  */
 - (instancetype)initWithDelegate:(id<RMessageViewProtocol>)delegate
                            title:(NSAttributedString *)title
@@ -86,8 +87,8 @@
                        rightView:(UIView *)rightView
                   backgroundView:(UIView *)backgroundView
                        tapAction:(void (^)(void))tapBlock
-                       dismissal:(void (^)(void))dismissalBlock
-                      completion:(void (^)(void))completionBlock;
+            presentingCompletion:(void (^)(void))presentingCompletionBlock
+             dismissCompletion:(void (^)(void))dismissCompletionBlock;
 
 /** Use this method to load a custom design file on top of the base design file. Can be called
  multiple times to add designs from multiple files */

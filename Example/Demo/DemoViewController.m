@@ -9,6 +9,7 @@
 #import "DemoViewController.h"
 #import "NSString+NSAttributedString.h"
 #import "RMessage.h"
+//#import "RMessageView.h"
 
 @interface DemoViewController () <RMessageProtocol>
 
@@ -165,7 +166,12 @@
                             duration:RMessageDurationEndless
                           atPosition:RMessagePositionTop
                 canBeDismissedByUser:NO
-                           tapAction:nil];
+                            leftView:nil
+                           rightView:nil
+                      backgroundView:nil
+                           tapAction:^{NSLog(@"tapped");}
+                presentingCompletion:^{NSLog(@"presented");}
+                   dismissCompletion:^{NSLog(@"dismissed");}];
 }
 
 - (IBAction)didTapLong:(id)sender
@@ -179,7 +185,12 @@
                                     duration:10.f
                                   atPosition:RMessagePositionTop
                         canBeDismissedByUser:YES
-                                   tapAction:nil];
+                                    leftView:nil
+                                   rightView:nil
+                              backgroundView:nil
+                                   tapAction:^{NSLog(@"tapped");}
+                        presentingCompletion:^{NSLog(@"presented");}
+                           dismissCompletion:^{NSLog(@"dismissed");}];
 }
 
 - (IBAction)didTapBottom:(id)sender
@@ -278,16 +289,15 @@
   self.navigationController.navigationBarHidden = !self.navigationController.navigationBarHidden;
 }
 
-/*- (CGFloat)customVerticalOffsetForMessageView:(RMessageView *)messageView
-{
-    return 88.f; // specify an additional offset here.
-}
-*/
+//- (CGFloat)customVerticalOffsetForMessageView:(RMessageView *)messageView
+//{
+//    return 88.f; // specify an additional offset here.
+//}
 
-/*- (void)customizeMessageView:(RMessageView *)messageView
-{
-  messageView.messageOpacity = 0.5f;
-}
-*/
+//- (void)customizeMessageView:(RMessageView *)messageView
+//{
+//  messageView.interElementMargin = 0.f;
+//  messageView.titleSubtitleLabelsSizeToFit = YES;
+//}
 
 @end

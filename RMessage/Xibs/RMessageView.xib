@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="12118" systemVersion="16E195" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.XIB" version="3.0" toolsVersion="13529" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
     <dependencies>
-        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="12086"/>
+        <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="13527"/>
         <capability name="documents saved in the Xcode 8 format" minToolsVersion="8.0"/>
     </dependencies>
     <objects>
@@ -42,17 +42,22 @@
                 </view>
             </subviews>
             <constraints>
-                <constraint firstItem="49I-AE-5sP" firstAttribute="top" relation="greaterThanOrEqual" secondItem="iN0-l3-epB" secondAttribute="top" constant="8" id="Azz-KF-Xf8"/>
-                <constraint firstAttribute="trailing" secondItem="49I-AE-5sP" secondAttribute="trailing" priority="751" constant="8" id="N4l-Ol-H0N"/>
-                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="49I-AE-5sP" secondAttribute="bottom" constant="8" id="Urt-nc-SD2"/>
+                <constraint firstItem="49I-AE-5sP" firstAttribute="top" relation="greaterThanOrEqual" secondItem="iN0-l3-epB" secondAttribute="top" id="Azz-KF-Xf8"/>
+                <constraint firstAttribute="trailing" relation="greaterThanOrEqual" secondItem="49I-AE-5sP" secondAttribute="trailing" id="JRO-Xc-1CA"/>
+                <constraint firstAttribute="trailing" secondItem="49I-AE-5sP" secondAttribute="trailing" priority="750" constant="8" id="N4l-Ol-H0N"/>
+                <constraint firstItem="49I-AE-5sP" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="iN0-l3-epB" secondAttribute="leading" id="UZa-kD-CYj"/>
+                <constraint firstAttribute="bottom" relation="greaterThanOrEqual" secondItem="49I-AE-5sP" secondAttribute="bottom" id="Urt-nc-SD2"/>
                 <constraint firstItem="49I-AE-5sP" firstAttribute="centerY" secondItem="iN0-l3-epB" secondAttribute="centerY" id="XoR-Zr-h6e"/>
-                <constraint firstItem="49I-AE-5sP" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" priority="751" constant="8" id="uCe-Eo-QlD"/>
-                <constraint firstItem="49I-AE-5sP" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" priority="749" constant="8" id="uoF-wG-j5j"/>
+                <constraint firstAttribute="bottom" secondItem="49I-AE-5sP" secondAttribute="bottom" priority="750" constant="8" id="gqx-Wa-Hbr"/>
+                <constraint firstItem="49I-AE-5sP" firstAttribute="centerX" secondItem="iN0-l3-epB" secondAttribute="centerX" priority="750" id="kfJ-K0-hYf"/>
+                <constraint firstItem="49I-AE-5sP" firstAttribute="leading" secondItem="iN0-l3-epB" secondAttribute="leading" priority="750" constant="8" id="uCe-Eo-QlD"/>
+                <constraint firstItem="49I-AE-5sP" firstAttribute="top" secondItem="iN0-l3-epB" secondAttribute="top" priority="750" constant="8" id="uoF-wG-j5j"/>
             </constraints>
             <nil key="simulatedStatusBarMetrics"/>
             <freeformSimulatedSizeMetrics key="simulatedDestinationMetrics"/>
             <connections>
-                <outlet property="bottomSpaceGreaterOrEqualConstraint" destination="Urt-nc-SD2" id="8a7-g5-KEn"/>
+                <outlet property="bottomSpaceConstraint" destination="gqx-Wa-Hbr" id="xZ0-tl-ppb"/>
+                <outlet property="bottomSpaceGreaterOrEqualConstraint" destination="Urt-nc-SD2" id="599-pn-dWX"/>
                 <outlet property="subtitleLabel" destination="86Q-SR-N4H" id="b36-f7-jMs"/>
                 <outlet property="titleLabel" destination="bJU-tq-cfR" id="cQG-kC-CBc"/>
                 <outlet property="titleSubtitleContainerView" destination="49I-AE-5sP" id="gnK-Tn-Kb9"/>
@@ -60,8 +65,8 @@
                 <outlet property="titleSubtitleContainerViewLeadingConstraint" destination="uCe-Eo-QlD" id="v22-Xh-csP"/>
                 <outlet property="titleSubtitleContainerViewTrailingConstraint" destination="N4l-Ol-H0N" id="Gxt-Jp-ZAW"/>
                 <outlet property="titleSubtitleVerticalSpacingConstraint" destination="sUB-xD-36O" id="Zge-tu-4Gu"/>
-                <outlet property="topSpaceConstraint" destination="uoF-wG-j5j" id="9Ta-qb-0u4"/>
-                <outlet property="topSpaceGreaterOrEqualConstraint" destination="Azz-KF-Xf8" id="py3-TR-zBQ"/>
+                <outlet property="topSpaceConstraint" destination="uoF-wG-j5j" id="EsK-Mq-aab"/>
+                <outlet property="topSpaceGreaterOrEqualConstraint" destination="Azz-KF-Xf8" id="o5e-WX-zbj"/>
             </connections>
             <point key="canvasLocation" x="-258" y="723"/>
         </view>

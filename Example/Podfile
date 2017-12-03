@@ -2,7 +2,8 @@ source 'https://github.com/CocoaPods/Specs.git'
 #use_frameworks!
 
 target "Example" do
+  platform :ios, '9.0'
   pod 'HexColors', '~> 4.0'
-  pod 'RMessage', :path => '..' 
-  #pod 'Reveal-SDK', :configurations => ['Debug']
+  pod 'RMessage', :path => '..'
+  pod 'Reveal-SDK', :configurations => ['Debug']
 end

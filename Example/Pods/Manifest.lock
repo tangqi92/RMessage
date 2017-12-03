@@ -1,20 +1,23 @@
 PODS:
   - HexColors (4.0.0)
+  - Reveal-SDK (12)
   - RMessage (3.0.0):
     - HexColors (~> 4.0)
 
 DEPENDENCIES:
   - HexColors (~> 4.0)
+  - Reveal-SDK
   - RMessage (from `..`)
 
 EXTERNAL SOURCES:
   RMessage:
-    :path: ".."
+    :path: ..
 
 SPEC CHECKSUMS:
   HexColors: 5f95843ef89aff6a72e1fd3a8ebabf205cc43379
+  Reveal-SDK: 58517b2a4d5d69dcb98e62aa4a5e62c84b5e0061
   RMessage: aa07000240a073280db6de0d9b3cd1f7df0f22a3
 
-PODFILE CHECKSUM: 135d9c1f46818d0b6eb38d925184957a72a0d678
+PODFILE CHECKSUM: 5fa67ceb2630e91f49eecb6d60527df3c44029e8
 
-COCOAPODS: 1.2.1
+COCOAPODS: 1.3.1

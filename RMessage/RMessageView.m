@@ -27,7 +27,6 @@ static NSMutableDictionary *globalDesignDictionary;
 @property (nonatomic, weak) IBOutlet UIView *titleSubtitleContainerView;
 @property (nonatomic, weak) IBOutlet UILabel *titleLabel;
 @property (nonatomic, weak) IBOutlet UILabel *subtitleLabel;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleContainerViewCenterYConstraint;
 
 @property (nonatomic, strong) UIView *leftView;
 @property (nonatomic, strong) UIView *rightView;
@@ -48,18 +47,25 @@ static NSMutableDictionary *globalDesignDictionary;
 /** The vertical space between the message view top to its view controller top */
 @property (nonatomic, strong) NSLayoutConstraint *topToVCLayoutConstraint;
 
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleContainerViewCenterYConstraint;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleVerticalSpacingConstraint;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleContainerViewLeadingConstraint;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleContainerViewTrailingConstraint;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *topSpaceConstraint;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *topSpaceGreaterOrEqualConstraint;
 @property (nonatomic, weak) IBOutlet NSLayoutConstraint *bottomSpaceGreaterOrEqualConstraint;
-@property (nonatomic, weak) IBOutlet NSLayoutConstraint *titleSubtitleVerticalSpacingConstraint;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *topSpaceConstraint;
+@property (nonatomic, weak) IBOutlet NSLayoutConstraint *bottomSpaceConstraint;
 
 @property (nonatomic, strong) NSMutableArray *interElementMarginConstraints;
 
-@property (nonatomic, copy) void (^dismissalBlock)(void);
+/** Callback block called after the messageView is tapped */
 @property (nonatomic, copy) void (^tapBlock)(void);
-@property (nonatomic, copy) void (^completionBlock)(void);
+
+/** Callback block called after the messageView finishes dismissing */
+@property (nonatomic, copy) void (^dismissCompletionBlock)(void);
+
+/** Callback block called after the messageView finishes presenting */
+@property (nonatomic, copy) void (^presentingCompletionBlock)(void);
 
 /** The starting constant value that should be set for the topToVCTopLayoutConstraint when animating */
 @property (nonatomic, assign) CGFloat topToVCStartConstant;
@@ -74,6 +80,7 @@ static NSMutableDictionary *globalDesignDictionary;
 @property (nonatomic, copy) NSString *customTypeName;
 
 @property (nonatomic, assign) BOOL shouldBlurBackground;
+@property (nonatomic, assign) BOOL dismissingEnabled;
 
 @end
 
@@ -193,11 +200,11 @@ static NSMutableDictionary *globalDesignDictionary;
                        rightView:(UIView *)rightView
                   backgroundView:(UIView *)backgroundView
                        tapAction:(void (^)(void))tapBlock
-                       dismissal:(void (^)(void))dismissalBlock
-                      completion:(void (^)(void))completionBlock
+            presentingCompletion:(void (^)(void))presentingCompletionBlock
+             dismissCompletion:(void (^)(void))dismissCompletionBlock
+
 {
-  self = [[NSBundle bundleForClass:[self class]] loadNibNamed:NSStringFromClass([self class]) owner:self options:nil]
-           .firstObject;
+  self = [[NSBundle bundleForClass:[self class]] loadNibNamed:NSStringFromClass([self class]) owner:self options:nil].firstObject;
   if (self) {
     _title = title ? title : [[NSAttributedString alloc] initWithString:@""];
     _subtitle = subtitle ? subtitle : [[NSAttributedString alloc] initWithString:@""];
@@ -212,8 +219,8 @@ static NSMutableDictionary *globalDesignDictionary;
                                            rightView:rightView
                                       backgroundView:backgroundView
                                            tapAction:tapBlock
-                                           dismissal:dismissalBlock
-                                          completion:completionBlock];
+                                           presentingCompletion:presentingCompletionBlock
+                                          dismissCompletion:dismissCompletionBlock];
     if (error) return nil;
   }
   return self;
@@ -263,6 +270,12 @@ static NSMutableDictionary *globalDesignDictionary;
   [self.subtitleLabel setTextColor:_subtitleTextColor];
 }
 
+- (void)setTitleSubtitleLabelsSizeToFit:(BOOL)titleSubtitleLabelsSizeToFit
+{
+  _titleSubtitleLabelsSizeToFit = titleSubtitleLabelsSizeToFit;
+  [self setupTitleSubtitleLabelsSizeToFit];
+}
+
 - (void)setInterElementMargin:(CGFloat)interElementMargin
 {
   _interElementMargin = interElementMargin;
@@ -300,6 +313,7 @@ static NSMutableDictionary *globalDesignDictionary;
 - (void)setVerticalSpacingToSuperViewBottom:(CGFloat)spacing
 {
   self.bottomSpaceGreaterOrEqualConstraint.constant = spacing;
+  self.bottomSpaceConstraint.constant = spacing;
 }
 
 #pragma mark View Methods
@@ -311,6 +325,7 @@ static NSMutableDictionary *globalDesignDictionary;
     if (self.delegate && [self.delegate respondsToSelector:@selector(windowRemovedForEndlessDurationMessageView:)]) {
       [self.delegate windowRemovedForEndlessDurationMessageView:self];
     }
+    [self dismiss];
   }
 }
 
@@ -338,25 +353,27 @@ static NSMutableDictionary *globalDesignDictionary;
                              rightView:(UIView *)rightView
                         backgroundView:(UIView *)backgroundView
                              tapAction:(void (^)(void))tapBlock
-                             dismissal:(void (^)(void))dismissalBlock
-                            completion:(void (^)(void))completionBlock
+                  presentingCompletion:(void (^)(void))presentingCompletionBlock
+                     dismissCompletion:(void (^)(void))dismissCompletionBlock
 
 {
   _delegate = delegate;
   _duration = duration;
   viewController ? _viewController = viewController : (_viewController = [UIWindow topViewController]);
   _messagePosition = position;
-  _tapBlock = tapBlock;
-  _dismissalBlock = dismissalBlock;
-  _completionBlock = completionBlock;
+  _dismissingEnabled = dismissingEnabled;
   _messageType = messageType;
   _customTypeName = customTypeName;
   _interElementMargin = 8.f;
+  _titleSubtitleLabelsSizeToFit = NO;
+  _tapBlock = tapBlock;
+  _presentingCompletionBlock = presentingCompletionBlock;
+  _dismissCompletionBlock = dismissCompletionBlock;
 
   _interElementMarginConstraints = [NSMutableArray
     arrayWithObjects:self.titleSubtitleContainerViewLeadingConstraint, self.titleSubtitleVerticalSpacingConstraint,
                      self.titleSubtitleContainerViewTrailingConstraint, self.bottomSpaceGreaterOrEqualConstraint,
-                     self.topSpaceGreaterOrEqualConstraint, self.topSpaceConstraint, nil];
+                     self.topSpaceGreaterOrEqualConstraint, self.topSpaceConstraint, self.bottomSpaceConstraint, nil];
   if (leftView) {
     _leftView = leftView;
     [self setupLeftView];
@@ -375,7 +392,7 @@ static NSMutableDictionary *globalDesignDictionary;
 
   [self setupDesign];
   [self setupLayout];
-  if (dismissingEnabled) [self setupGestureRecognizers];
+  [self setupGestureRecognizers];
   return nil;
 }
 
@@ -436,11 +453,13 @@ static NSMutableDictionary *globalDesignDictionary;
   [self setupImagesAndBackground];
   [self setupTitleLabel];
   [self setupSubtitleLabel];
+  [self setupTitleSubtitleLabelsSizeToFit];
 }
 
 - (void)setupLayout
 {
   self.translatesAutoresizingMaskIntoConstraints = NO;
+  if (!_title || !_subtitle) self.titleSubtitleVerticalSpacingConstraint.constant = 0;
 
   // Add RMessage to superview and prepare the ending y position constants
   [self layoutMessageForPresentation];
@@ -677,6 +696,20 @@ static NSMutableDictionary *globalDesignDictionary;
   _subtitleLabel.attributedText = _subtitle;
 }
 
+- (void)setupTitleSubtitleLabelsSizeToFit
+{
+  if (_titleSubtitleLabelsSizeToFit) {
+    [self.titleLabel setContentHuggingPriority:UILayoutPriorityDefaultHigh forAxis:UILayoutConstraintAxisHorizontal];
+    [self.subtitleLabel setContentHuggingPriority:751 forAxis:UILayoutConstraintAxisHorizontal];
+    if (!_title) {
+      [self.titleLabel setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+    }
+    if (!_subtitle) {
+      [self.subtitleLabel setContentHuggingPriority:UILayoutPriorityDefaultLow forAxis:UILayoutConstraintAxisHorizontal];
+    }
+  }
+}
+
 - (void)setupBlurBackground
 {
   UIBlurEffect *blurEffect = [UIBlurEffect effectWithStyle:UIBlurEffectStyleLight];
@@ -718,7 +751,7 @@ static NSMutableDictionary *globalDesignDictionary;
                                                                       constant:0.f];
   NSLayoutConstraint *leftViewLeading = [NSLayoutConstraint constraintWithItem:self.leftView
                                                                      attribute:NSLayoutAttributeLeading
-                                                                     relatedBy:NSLayoutRelationEqual
+                                                                     relatedBy:NSLayoutRelationGreaterThanOrEqual
                                                                         toItem:self
                                                                      attribute:NSLayoutAttributeLeading
                                                                     multiplier:1.f
@@ -755,8 +788,7 @@ static NSMutableDictionary *globalDesignDictionary;
   [self.interElementMarginConstraints addObjectsFromArray:@[leftViewLeading, leftViewTrailing, leftViewBottom]];
 
   [self addSubview:self.leftView];
-  [[self class] activateConstraints:@[leftViewCenterY, leftViewLeading, leftViewTrailing, leftViewBottom, width, height]
-                        inSuperview:self];
+  [[self class] activateConstraints:@[leftViewCenterY, leftViewLeading, leftViewTrailing, leftViewBottom, width, height] inSuperview:self];
 }
 
 - (void)setupRightView
@@ -785,7 +817,7 @@ static NSMutableDictionary *globalDesignDictionary;
                                                                        constant:_interElementMargin];
   NSLayoutConstraint *rightViewTrailing = [NSLayoutConstraint constraintWithItem:self.rightView
                                                                        attribute:NSLayoutAttributeTrailing
-                                                                       relatedBy:NSLayoutRelationEqual
+                                                                       relatedBy:NSLayoutRelationLessThanOrEqual
                                                                           toItem:self
                                                                        attribute:NSLayoutAttributeTrailing
                                                                       multiplier:1.f
@@ -852,6 +884,85 @@ static NSMutableDictionary *globalDesignDictionary;
   [[self class] activateConstraints:hConstraints inSuperview:self];
   [[self class] activateConstraints:vConstraints inSuperview:self];
 }
+
+// --develop
+//
+// - (void)layoutMessageForPresentation
+// {
+//   if ([self.viewController isKindOfClass:[UINavigationController class]] ||
+//       [self.viewController.parentViewController isKindOfClass:[UINavigationController class]]) {
+//     [self layoutMessageForNavigationControllerPresentation];
+//   } else {
+//     [self layoutMessageForStandardPresentation];
+//   }
+// }
+//
+// - (void)layoutMessageForNavigationControllerPresentation
+// {
+//   self.titleSubtitleContainerViewCenterYConstraint.constant = 0.f;
+
+//   UINavigationController *messageNavigationController;
+
+//   if ([self.viewController isKindOfClass:[UINavigationController class]]) {
+//     messageNavigationController = (UINavigationController *)self.viewController;
+//   } else {
+//     messageNavigationController = (UINavigationController *)self.viewController.parentViewController;
+//   }
+
+//   BOOL messageNavigationBarHidden =
+//     [RMessageView isNavigationBarHiddenForNavigationController:messageNavigationController];
+
+//   if (self.messagePosition != RMessagePositionBottom) {
+//     if (!messageNavigationBarHidden && self.messagePosition == RMessagePositionTop) {
+//       // Present from below nav bar when presenting from the top and navigation bar is present
+//       [messageNavigationController.view insertSubview:self belowSubview:messageNavigationController.navigationBar];
+
+//       /* If view controller edges dont extend under top bars (navigation bar in our case) we must not factor in the
+//        navigation bar frame when animating RMessage's final position */
+//       if ([[self class] viewControllerEdgesExtendUnderTopBars:messageNavigationController]) {
+//         self.topToVCFinalConstant = [UIApplication sharedApplication].statusBarFrame.size.height +
+//                                     messageNavigationController.navigationBar.bounds.size.height +
+//                                     [self customVerticalOffset];
+//       } else {
+//         self.topToVCFinalConstant = [self customVerticalOffset];
+//       }
+//     } else {
+//       /* Navigation bar hidden or being asked to present as nav bar overlay, so present above status bar and/or
+//        navigation bar */
+//       self.topToVCFinalConstant = [self customVerticalOffset];
+//       self.titleSubtitleContainerViewCenterYConstraint.constant =
+//         [UIApplication sharedApplication].statusBarFrame.size.height / 2.f;
+//       [self.viewController.view addSubview:self];
+//     }
+//     [self setupTitleSubtitleLabelsLayoutWidth];
+//   } else {
+//     // Present from bottom
+//     [self.viewController.view addSubview:self];
+//     [self setupTitleSubtitleLabelsLayoutWidth];
+//     [self layoutIfNeeded];
+//     CGFloat offset = -self.bounds.size.height - [self customVerticalOffset];
+//     if (messageNavigationController && !messageNavigationController.isToolbarHidden) {
+//       // If tool bar present animate above toolbar
+//       offset -= messageNavigationController.toolbar.bounds.size.height;
+//     }
+//     self.topToVCFinalConstant = offset;
+//   }
+// }
+//
+// - (void)layoutMessageForStandardPresentation
+// {
+//   [self.viewController.view addSubview:self];
+//   [self setupTitleSubtitleLabelsLayoutWidth];
+//   [self layoutIfNeeded];
+//   if (self.messagePosition == RMessagePositionBottom) {
+//     self.topToVCFinalConstant = -self.bounds.size.height - [self customVerticalOffset];
+//   } else {
+//     self.topToVCFinalConstant = [self customVerticalOffset];
+//     self.titleSubtitleContainerViewCenterYConstraint.constant =
+//       [UIApplication sharedApplication].statusBarFrame.size.height / 2.f;
+//   }
+// }
+// --develop
 
 - (void)layoutMessageForPresentation
 {
@@ -937,7 +1048,7 @@ static NSMutableDictionary *globalDesignDictionary;
 - (void)setupGestureRecognizers
 {
   UISwipeGestureRecognizer *gestureRecognizer =
-    [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(didSwipeToDismissMessageView:)];
+    [[UISwipeGestureRecognizer alloc] initWithTarget:self action:@selector(didSwipeMessageView:)];
   [gestureRecognizer
    setDirection:(self.messagePosition == RMessagePositionBottom) ? UISwipeGestureRecognizerDirectionDown : UISwipeGestureRecognizerDirectionUp];
   [self addGestureRecognizer:gestureRecognizer];
@@ -950,11 +1061,12 @@ static NSMutableDictionary *globalDesignDictionary;
 /* called after the following gesture depending on message position during initialization
  UISwipeGestureRecognizerDirectionUp when message position set to Top,
  UISwipeGestureRecognizerDirectionDown when message position set to bottom */
-- (void)didSwipeToDismissMessageView:(UISwipeGestureRecognizer *)swipeGesture
+- (void)didSwipeMessageView:(UISwipeGestureRecognizer *)swipeGesture
 {
-  if (self.delegate && [self.delegate respondsToSelector:@selector(didSwipeToDismissMessageView:)]) {
-    [self.delegate didSwipeToDismissMessageView:self];
+  if (self.delegate && [self.delegate respondsToSelector:@selector(didSwipeMessageView:)]) {
+    [self.delegate didSwipeMessageView:self];
   }
+  if (self.dismissingEnabled) [self dismiss];
 }
 
 - (void)didTapMessageView:(UITapGestureRecognizer *)tapGesture
@@ -962,6 +1074,8 @@ static NSMutableDictionary *globalDesignDictionary;
   if (self.delegate && [self.delegate respondsToSelector:@selector(didTapMessageView:)]) {
     [self.delegate didTapMessageView:self];
   }
+  if (self.tapBlock) self.tapBlock();
+  if (self.dismissingEnabled) [self dismiss];
 }
 
 #pragma mark - Presentation Methods
@@ -1006,9 +1120,9 @@ static NSMutableDictionary *globalDesignDictionary;
       self.isPresenting = NO;
       self.messageIsFullyDisplayed = YES;
       if ([self.delegate respondsToSelector:@selector(messageViewDidPresent:)]) {
-        if (self.completionBlock) self.completionBlock();
         [self.delegate messageViewDidPresent:self];
       }
+      if (self.presentingCompletionBlock) self.presentingCompletionBlock();
     }];
   });
 }
@@ -1035,8 +1149,8 @@ static NSMutableDictionary *globalDesignDictionary;
       if ([self.delegate respondsToSelector:@selector(messageViewDidDismiss:)]) {
         [self.delegate messageViewDidDismiss:self];
       }
+      if (self.dismissCompletionBlock) self.dismissCompletionBlock();
       if (completionBlock) completionBlock();
-      if (self.dismissalBlock) self.dismissalBlock();
     }];
   });
 }

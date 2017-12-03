@@ -45,8 +45,8 @@ typedef NS_ENUM(NSInteger, RMessageDuration) { RMessageDurationAutomatic = 0, RM
 /** Tells the delegate when the window has been removed for an endless duration message view. */
 - (void)windowRemovedForEndlessDurationMessageView:(RMessageView *)messageView;
 
-/** Tells the delegate when the message view was swiped to for dismissal. */
-- (void)didSwipeToDismissMessageView:(RMessageView *)messageView;
+/** Tells the delegate when the message view was swiped. */
+- (void)didSwipeMessageView:(RMessageView *)messageView;
 
 /** Tells the delegate when the message view was tapped. */
 - (void)didTapMessageView:(RMessageView *)messageView;
@@ -161,8 +161,8 @@ typedef NS_ENUM(NSInteger, RMessageDuration) { RMessageDurationAutomatic = 0, RM
  @param rightView The view to position on the right of the title and subtitle labels
  @param backgroundView The view to position as the background view of the message
  @param tapBlock The block that should be executed when the user taps on the message
- @param dismissalBlock The block that should be executed, after the message is dismissed
- @param completionBlock The block that should be executed after the message finishes presenting
+ @param presentingCompletionBlock The block that should be executed after the message finishes presenting
+ @param dismissCompletionBlock The block that should be executed, after the message is dismissed
  */
 + (void)showNotificationWithTitle:(NSAttributedString *)title
                          subtitle:(NSAttributedString *)subtitle
@@ -175,8 +175,8 @@ typedef NS_ENUM(NSInteger, RMessageDuration) { RMessageDurationAutomatic = 0, RM
                         rightView:(UIView *)rightView
                    backgroundView:(UIView *)backgroundView
                         tapAction:(void (^)(void))tapBlock
-                        dismissal:(void (^)(void))dismissalBlock
-                       completion:(void (^)(void))completionBlock;
+             presentingCompletion:(void (^)(void))presentingCompletionBlock
+                dismissCompletion:(void (^)(void))dismissCompletionBlock;
 /**
  Shows a notification message in a specific view controller
  @param viewController The view controller to show the notification in.
@@ -281,8 +281,8 @@ typedef NS_ENUM(NSInteger, RMessageDuration) { RMessageDurationAutomatic = 0, RM
  @param backgroundView The view to position as the background view of the message
  @param dismissingEnabled Should the message be dismissed when the user taps/swipes it
  @param tapBlock The block that should be executed when the user taps on the message
- @param dismissalBlock The block that should be executed, after the message is dismissed
- @param completionBlock The block that should be executed after the message finishes presenting
+ @param presentingCompletionBlock The block that should be executed after the message finishes presenting
+ @param dismissCompletionBlock The block that should be executed after the message is dismissed
  */
 + (void)showNotificationInViewController:(UIViewController *)viewController
                                    title:(NSAttributedString *)title
@@ -296,8 +296,8 @@ typedef NS_ENUM(NSInteger, RMessageDuration) { RMessageDurationAutomatic = 0, RM
                                rightView:(UIView *)rightView
                           backgroundView:(UIView *)backgroundView
                                tapAction:(void (^)(void))tapBlock
-                               dismissal:(void (^)(void))dismissalBlock
-                              completion:(void (^)(void))completionBlock;
+                    presentingCompletion:(void (^)(void))presentingCompletionBlock
+                     dismissCompletion:(void (^)(void))dismissCompletionBlock;
 
 /**
  Fades out the currently displayed notification. If another notification is in the queue,

@@ -19,7 +19,7 @@
 
 - (void)windowRemovedForEndlessDurationMessageView:(RMessageView *)messageView;
 
-- (void)didSwipeToDismissMessageView:(RMessageView *)messageView;
+- (void)didSwipeMessageView:(RMessageView *)messageView;
 
 - (void)didTapMessageView:(RMessageView *)messageView;
 
