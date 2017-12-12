@@ -14,8 +14,8 @@ static NSString *const RDesignFileName = @"RMessageDefaultDesign";
 
 /** Animation constants */
 static double const kRMessageAnimationDuration = 0.3f;
-static double const kRMessageDisplayTime = 1.5f;
-static double const kRMessageExtraDisplayTimePerPixel = 0.04f;
+static double const kRMessageDisplayTime = 0.5f;
+static double const kRMessageExtraDisplayTimePerPixel = 0.02f;
 
 /** Contains the global design dictionary specified in the entire design RDesignFile */
 static NSMutableDictionary *globalDesignDictionary;
