@@ -841,8 +841,9 @@ static NSMutableDictionary *globalDesignDictionary;
     self.topToVCFinalConstant = -self.bounds.size.height - [self customVerticalOffset];
   } else {
     self.topToVCFinalConstant = [self customVerticalOffset];
-    self.titleSubtitleContainerViewCenterYConstraint.constant =
-      [UIApplication sharedApplication].statusBarFrame.size.height / 2.f;
+    // Prevent statusBar being hidden
+    CGFloat statusBarHeight = ([[UIScreen mainScreen] bounds].size.height == 812) ? 44.f : [UIApplication sharedApplication].statusBarFrame.size.height;
+    self.titleSubtitleContainerViewCenterYConstraint.constant = statusBarHeight / 2.f;
   }
   [self.viewController.view addSubview:self];
 }
