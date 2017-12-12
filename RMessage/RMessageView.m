@@ -816,8 +816,9 @@ static NSMutableDictionary *globalDesignDictionary;
       /* Navigation bar hidden or being asked to present as nav bar overlay, so present above status bar and/or
        navigation bar */
       self.topToVCFinalConstant = [self customVerticalOffset];
-      self.titleSubtitleContainerViewCenterYConstraint.constant =
-        [UIApplication sharedApplication].statusBarFrame.size.height / 2.f;
+      // Prevent statusBar being hidden
+      CGFloat statusBarHeight = ([[UIScreen mainScreen] bounds].size.height == 812) ? 44.f : [UIApplication sharedApplication].statusBarFrame.size.height
+      self.titleSubtitleContainerViewCenterYConstraint.constant = statusBarHeight / 2.f;
       [self.viewController.view addSubview:self];
     }
   } else {
